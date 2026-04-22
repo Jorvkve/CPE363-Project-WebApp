@@ -1,40 +1,71 @@
 # 🎬 CineMax Movie Booking System
 
-ระบบจองตั๋วหนังออนไลน์ พัฒนาโดยใช้ **PHP + MySQL**  
-รองรับการเลือกหนัง เลือกรอบ เลือกที่นั่ง ชำระเงิน และแสดงตั๋วแบบ QR Code
+<p align="center">
+  <b>ระบบจองตั๋วหนังออนไลน์</b><br>
+  Developed with PHP & MySQL
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-Backend-blue">
+  <img src="https://img.shields.io/badge/MySQL-Database-orange">
+  <img src="https://img.shields.io/badge/Status-Completed-success">
+</p>
 
 ---
 
-## ✨ Features
+## ✨ Overview
 
-### 👤 User
-- 🔍 ดูรายการหนัง
-- 🎟️ เลือกรอบและที่นั่ง
+CineMax เป็นระบบจองตั๋วหนังออนไลน์ที่ช่วยให้ผู้ใช้งานสามารถ  
+เลือกหนัง เลือกรอบ เลือกที่นั่ง และชำระเงินผ่านเว็บไซต์ได้อย่างสะดวก  
+
+ระบบถูกออกแบบให้มีทั้ง:
+- 👤 ฝั่งผู้ใช้งาน (User)
+- 🛠️ ฝั่งผู้ดูแลระบบ (Admin)
+
+พร้อมฟีเจอร์เสริม เช่น Email Ticket, QR Code และ Dashboard
+
+---
+
+## 🚀 Features
+
+### 👤 User Features
+- 🔍 ค้นหาและดูรายการหนัง
+- 🎟️ เลือกรอบฉาย
+- 💺 เลือกที่นั่ง (VIP / Normal)
 - 💳 ชำระเงิน
 - 📩 รับตั๋วผ่าน Email
 - 🎫 แสดง QR Code สำหรับตั๋ว
 
-### 🛠️ Admin
-- 🎬 จัดการหนัง (เพิ่ม/แก้ไข/ลบ)
-- 🕐 จัดการรอบฉาย
+---
+
+### 🛠️ Admin Features
+- 🎬 จัดการหนัง (เพิ่ม / แก้ไข / ลบ)
+- 🕐 จัดการรอบหนัง
 - 👥 จัดการสมาชิก
-- 📊 ดู Dashboard (รายได้ / การจอง)
+- 📊 Dashboard แสดงรายได้และสถิติ
+- ❌ ป้องกันการลบรอบที่มีการจอง
 
 ---
 
-## 🛠️ Technologies Used
+## 🧠 Technologies Used
 
-- 💻 PHP (Backend)
-- 🗄️ MySQL (Database)
-- 🎨 HTML / CSS / JavaScript
-- 📊 Chart.js (Dashboard)
-- 📧 PHPMailer (Send Email)
-- 🔳 QR Code API
+| Technology | Description |
+|----------|------------|
+| PHP | Backend Logic |
+| MySQL | Database |
+| HTML/CSS | UI Design |
+| JavaScript | Interaction |
+| Chart.js | Dashboard Graph |
+| PHPMailer | Email System |
+| QR Code API | Generate Ticket QR |
 
 ---
 
-## 🚀 Installation (วิธีติดตั้ง)
+## 🏗️ System Architecture
 
-### 1. Clone โปรเจกต์
-```bash
-git clone https://github.com/Jorvkve/CPE363-Project-WebApp.git
+```text
+Client (Browser)
+      ↓
+   PHP Server
+      ↓
+   MySQL Database
