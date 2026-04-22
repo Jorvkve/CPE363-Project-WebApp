@@ -1,14 +1,16 @@
 <?php
+// === 1. นำเข้าไฟล์ตั้งค่าและตรวจสอบการล็อกอิน ===
 require_once 'config.php';
 requireLogin();
 
+// === 2. รับค่า Booking ID จาก URL ===
 $id = intval($_GET['id'] ?? 0);
 if (!$id) {
     header("Location: index.php");
     exit();
 }
 
-// ดึงข้อมูลการจอง + หนัง + รอบ
+// === 3. ดึงข้อมูลการจอง ข้อมูลหนัง และรอบฉายจากฐานข้อมูล ===
 $stmt = $conn->prepare("
     SELECT b.*, m.title, s.show_date, s.show_time, s.hall
     FROM bookings b
@@ -25,13 +27,13 @@ if (!$b) {
     exit();
 }
 
-// ถ้าจ่ายแล้ว redirect ไป mybooking
+// === 4. ตรวจสอบสถานะการชำระเงิน หากจ่ายแล้วให้ข้ามไปหน้าตั๋วของฉัน ===
 if ($b['payment_status'] === 'paid') {
     header("Location: mybooking.php?paid=1");
     exit();
 }
 
-// กดยืนยันการชำระเงิน
+// === 5. จัดการเมื่อผู้ใช้กดปุ่ม "ฉันชำระเงินแล้ว" (ส่งฟอร์มแบบ POST) ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $ref = 'PAY' . time() . rand(100, 999);
@@ -44,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $u->bind_param("sii", $ref, $id, $_SESSION['user_id']);
     $u->execute();
 
-    // ✅ เรียกส่งเมล (ต้องอยู่ก่อน header)
+    // === 6. ส่งอีเมลตั๋วหนังให้ผู้ใช้ (หลังจากอัปเดตสถานะว่าจ่ายแล้ว) ===
     require 'send_mail.php';
 
     $stmt = $conn->prepare("
@@ -67,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: mybooking.php?paid=1");
     exit();
 }
+// === 7. เริ่มต้นโครงสร้างหน้าเว็บ (HTML) ===
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -75,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ชำระเงิน - CineMax</title>
+    <!-- === 8. นำเข้าไฟล์สไตล์ (CSS) === -->
     <link rel="stylesheet" href="css/style.css">
     <style>
         .payment-card {
@@ -130,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
 
+    <!-- === 9. แถบเมนูด้านบน (Navigation Bar) === -->
     <nav>
         <a href="index.php" class="nav-logo">CINE<span>MAX</span></a>
         <ul class="nav-links">
@@ -139,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </ul>
     </nav>
 
+    <!-- === 10. ส่วนหัวหน้าเพจ === -->
     <div class="page-header">
         <div class="page-header-inner">
             <h1>💳 ชำระเงิน</h1>
@@ -149,16 +155,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="section" style="max-width:560px;">
         <div class="payment-card">
 
+            <!-- === 11. แสดงยอดเงินที่ต้องชำระ === -->
             <div style="font-size:0.85rem;color:var(--text-dim);margin-bottom:0.5rem;">ยอดที่ต้องชำระ</div>
             <div class="amount">฿<?= number_format($b['total_price'], 0) ?></div>
 
-            <!-- QR Code -->
+            <!-- === 12. แสดง QR Code สำหรับสแกนจ่ายเงิน === -->
             <div class="qr-box">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=CINEMAX-PAY-<?= $b['id'] ?>-<?= $b['total_price'] ?>"
                     alt="QR Code" width="180" height="180">
             </div>
 
-            <!-- รายละเอียดการจอง -->
+            <!-- === 13. แสดงรายละเอียดการจอง (หนัง, วันที่, รอบ, ที่นั่ง) === -->
             <div class="booking-detail">
                 <div><span class="lbl">หนัง</span><span
                         style="font-weight:600;"><?= htmlspecialchars($b['title']) ?></span></div>
@@ -185,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ⏱ กรุณาชำระภายใน 15 นาที มิฉะนั้นที่นั่งจะถูกยกเลิกอัตโนมัติ
             </div>
 
+            <!-- === 14. ฟอร์มสำหรับกดยืนยันการชำระเงิน === -->
             <form method="POST">
                 <button type="submit" class="btn btn-primary btn-full" style="font-size:1.1rem;padding:1rem;">
                     ✅ ฉันชำระเงินแล้ว
@@ -197,6 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+    <!-- === 15. ส่วนท้ายของหน้าเว็บ (Footer) === -->
     <footer><strong>CINEMAX</strong> &copy; <?= date('Y') ?></footer>
 
 </body>

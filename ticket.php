@@ -1,9 +1,12 @@
 <?php
+// === 1. นำเข้าไฟล์ตั้งค่าและตรวจสอบการล็อกอิน ===
 require_once 'config.php';
 requireLogin();
 
+// === 2. รับค่า ID ของตั๋วจาก URL ===
 $id = intval($_GET['id'] ?? 0);
 
+// === 3. ค้นหาข้อมูลตั๋ว หนัง และรอบฉายจากฐานข้อมูล ===
 $stmt = $conn->prepare("
 SELECT b.*, m.title, s.show_date, s.show_time, s.hall
 FROM bookings b
@@ -15,17 +18,21 @@ $stmt->bind_param("ii", $id, $_SESSION['user_id']);
 $stmt->execute();
 $b = $stmt->get_result()->fetch_assoc();
 
+// === 4. ตรวจสอบว่าพบข้อมูลตั๋วหรือไม่ ===
 if (!$b) {
     die("ไม่พบตั๋ว");
 }
 ?>
 
+<!-- === 5. เริ่มต้นโครงสร้างหน้าเว็บ (HTML) === -->
 <!DOCTYPE html>
 <html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <title>Ticket</title>
+    
+    <!-- === 6. จัดการความสวยงามของหน้าเว็บและตั๋ว (CSS) === -->
     <style>
     body {
         background: #0b0f1a;
@@ -96,6 +103,7 @@ if (!$b) {
 
 <body>
 
+    <!-- === 7. ปุ่มย้อนกลับไปหน้า My Booking === -->
     <div style="position:absolute;top:20px;left:20px;">
         <a href="mybooking.php"
             style="color:#fff;text-decoration:none;background:#000;padding:6px 12px;border-radius:6px;">
@@ -103,13 +111,16 @@ if (!$b) {
         </a>
     </div>
 
+    <!-- === 8. ส่วนแสดงตั๋วหนังหลัก (กรอบตั๋ว) === -->
     <div class="ticket">
 
+        <!-- === 9. ส่วนหัวของตั๋วหนัง === -->
         <div class="header">
             <h1>🎬 CineMax</h1>
             <p>Movie Ticket</p>
         </div>
 
+        <!-- === 10. ส่วนข้อมูลรายละเอียดของตั๋ว === -->
         <div class="content">
 
             <div class="row">
@@ -142,6 +153,7 @@ if (!$b) {
                 <span class="value">CMX-<?= $b['id'] ?></span>
             </div>
 
+            <!-- === 11. ส่วนแสดง QR Code สำหรับสแกนหน้าโรง === -->
             <div class="qr">
                 <p style="font-size:12px;color:#9ca3af;">แสดง QR นี้ที่หน้าโรง</p>
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=CINEMAX|<?= $b['id'] ?>" />
@@ -149,6 +161,7 @@ if (!$b) {
 
         </div>
 
+        <!-- === 12. ส่วนท้ายของตั๋วหนัง === -->
         <div class="footer">
             ขอบคุณที่ใช้บริการ CineMax 🙏
         </div>

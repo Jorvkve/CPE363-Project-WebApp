@@ -1,22 +1,27 @@
 <?php
+// === 1. นำเข้าไฟล์ตั้งค่า ===
 require_once 'config.php';
 
+// === 2. รับค่า ID ของหนังจาก URL (GET parameter) ===
 $id = intval($_GET['id'] ?? 0);
 if (!$id) {
     header("Location: index.php");
     exit();
 }
 
+// === 3. ดึงข้อมูลรายละเอียดของหนังเรื่องนี้จากฐานข้อมูล ===
 $stmt = $conn->prepare("SELECT * FROM movies WHERE id = ? AND is_showing = 1");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $movie = $stmt->get_result()->fetch_assoc();
 
+// ถ้าไม่พบข้อมูลหนัง หรือหนังไม่ได้ฉายแล้ว ให้กลับไปหน้าแรก
 if (!$movie) {
     header("Location: index.php");
     exit();
 }
 
+// === 4. ดึงข้อมูลรอบฉาย (Showtimes) ของหนังเรื่องนี้ ===
 $showtimes = $conn->prepare("
     SELECT *
     FROM showtimes
@@ -27,22 +32,27 @@ $showtimes->bind_param("i", $id);
 $showtimes->execute();
 $showtimes_result = $showtimes->get_result();
 
+// === 5. จัดกลุ่มรอบฉายตามวันที่ (เพื่อนำไปแสดงเป็นแท็บวันที่) ===
 $showtime_groups = [];
 while ($st = $showtimes_result->fetch_assoc()) {
     $showtime_groups[$st['show_date']][] = $st;
 }
 
+// === 6. กำหนดวันที่ที่ถูกเลือก (Selected Date) ===
 $available_dates = array_keys($showtime_groups);
 $selected_date = $_GET['date'] ?? ($available_dates[0] ?? null);
 if ($selected_date !== null && !isset($showtime_groups[$selected_date]) && !empty($available_dates)) {
     $selected_date = $available_dates[0];
 }
 
+// เก็บรอบฉายเฉพาะของวันที่ถูกเลือก
 $selected_showtimes = $selected_date !== null ? ($showtime_groups[$selected_date] ?? []) : [];
 
+// ไอคอนสำรองกรณีหนังไม่มีรูปโปสเตอร์
 $emojis = [1 => '🚀', 2 => '🎇', 3 => '🌌', 4 => '🎭', 5 => '🏰'];
 $emoji = $emojis[$id] ?? '🎬';
 ?>
+<!-- === 7. เริ่มต้นโครงสร้างหน้าเว็บ (HTML) === -->
 <!DOCTYPE html>
 <html lang="th">
 
@@ -50,11 +60,13 @@ $emoji = $emojis[$id] ?? '🎬';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($movie['title']) ?> - CineMax</title>
+    <!-- === 8. นำเข้าไฟล์สไตล์ (CSS) === -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
+    <!-- === 9. แถบเมนูด้านบน (Navigation Bar) === -->
     <nav>
         <a href="index.php" class="nav-logo">CINE<span>MAX</span></a>
         <ul class="nav-links">
@@ -70,6 +82,7 @@ $emoji = $emojis[$id] ?? '🎬';
         </ul>
     </nav>
 
+    <!-- === 10. ส่วนแสดงรายละเอียดของหนัง (โปสเตอร์, ชื่อ, เรื่องย่อ, เรท) === -->
     <div class="movie-detail-hero">
         <div class="movie-detail-grid">
             <div class="movie-detail-poster">
@@ -114,10 +127,12 @@ $emoji = $emojis[$id] ?? '🎬';
         </div>
     </div>
 
+    <!-- === 11. ส่วนเลือกวันและรอบฉาย (Showtimes Section) === -->
     <div class="section">
         <h2 class="section-title">Choose Showtime</h2>
 
         <?php if (!empty($available_dates)): ?>
+            <!-- === 12. แถบปุ่มแสดงวันที่ที่มีรอบฉาย === -->
             <div class="showtime-date-strip">
                 <?php foreach ($available_dates as $date): ?>
                     <?php $is_active = $date === $selected_date; ?>
@@ -131,6 +146,7 @@ $emoji = $emojis[$id] ?? '🎬';
             </div>
 
             <?php if (!empty($selected_showtimes)): ?>
+                <!-- === 13. แสดงรายการรอบฉายของวันที่เลือก === -->
                 <div class="showtime-selected-date"><?= date('D, d M Y', strtotime($selected_date)) ?></div>
 
                 <div class="showtime-list">
@@ -147,6 +163,7 @@ $emoji = $emojis[$id] ?? '🎬';
                 </div>
             <?php endif; ?>
 
+            <!-- === 14. แจ้งเตือนให้ล็อกอินก่อนหากผู้ใช้ยังไม่ได้ล็อกอิน === -->
             <?php if (!isLoggedIn()): ?>
                 <div
                     style="margin-top:1.5rem;padding:1rem 1.5rem;background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.3);border-radius:10px;font-size:0.9rem;">
@@ -162,11 +179,13 @@ $emoji = $emojis[$id] ?? '🎬';
             </div>
         <?php endif; ?>
 
+        <!-- === 15. ปุ่มย้อนกลับ === -->
         <div style="margin-top:2rem;">
             <a href="index.php" class="btn btn-outline">← Back to home</a>
         </div>
     </div>
 
+    <!-- === 16. ส่วนท้ายของหน้าเว็บ (Footer) === -->
     <footer>
         <strong>CINEMAX</strong> &copy; <?= date('Y') ?>
     </footer>

@@ -1,13 +1,16 @@
 <?php
+// === 1. นำเข้าไฟล์ตั้งค่าและตรวจสอบการล็อกอิน ===
 require_once 'config.php';
 requireLogin();
 
+// === 2. ดึงข้อมูลส่วนตัวของผู้ใช้จากฐานข้อมูล ===
 // ดึงข้อมูล user จาก DB
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
+// === 3. ดึงข้อมูลสถิติการจองตั๋วของผู้ใช้ (ยอดเงิน, จำนวนตั๋ว VIP/Normal) ===
 // สถิติการจอง
 $stats_stmt = $conn->prepare("
     SELECT COUNT(*) as total_bookings,
@@ -22,9 +25,11 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
 
 $error = $success = '';
 
+// === 4. จัดการการบันทึกข้อมูลเมื่อผู้ใช้กดอัปเดตโปรไฟล์หรือเปลี่ยนรหัสผ่าน (POST Request) ===
 // อัปเดตข้อมูลส่วนตัว
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
+    // === กรณี 4.1: อัปเดตข้อมูลส่วนตัว (ชื่อ, อีเมล, เบอร์โทร) ===
     if ($_POST['action'] === 'update_profile') {
         $fullname = trim($_POST['fullname'] ?? '');
         $email    = trim($_POST['email'] ?? '');
@@ -55,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     }
 
+    // === กรณี 4.2: เปลี่ยนรหัสผ่าน ===
     if ($_POST['action'] === 'change_password') {
         $old_pw  = $_POST['old_password']  ?? '';
         $new_pw  = $_POST['new_password']  ?? '';
@@ -82,12 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 ?>
+<!-- === 5. เริ่มต้นโครงสร้างหน้าเว็บ (HTML) === -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>โปรไฟล์ - CineMax</title>
+    <!-- === 6. นำเข้าไฟล์สไตล์ (CSS) และเขียน CSS เพิ่มเติมเฉพาะหน้านี้ === -->
     <link rel="stylesheet" href="css/style.css">
     <style>
         .tab-bar { display:flex; gap:0.5rem; margin-bottom:2rem; border-bottom:1px solid var(--border); }
@@ -102,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 </head>
 <body>
 
+<!-- === 7. แถบเมนูด้านบน (Navigation Bar) === -->
 <nav>
     <a href="index.php" class="nav-logo">CINE<span>MAX</span></a>
     <ul class="nav-links">
@@ -118,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </ul>
 </nav>
 
+<!-- === 8. ส่วนหัวหน้าเพจ === -->
 <div class="page-header">
     <div class="page-header-inner">
         <h1>👤 โปรไฟล์ของฉัน</h1>
@@ -130,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <?php if ($error): ?><div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div><?php endif; ?>
 
+    <!-- === 9. แสดงรูปโปรไฟล์ ข้อมูลเบื้องต้น และสถิติการใช้งาน === -->
     <!-- Avatar + Stats -->
     <div style="display:grid;grid-template-columns:200px 1fr;gap:2rem;align-items:start;margin-bottom:2rem;">
         <div style="text-align:center;">
@@ -162,12 +173,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
     </div>
 
+    <!-- === 10. แท็บเมนูสำหรับสลับหน้า (ข้อมูลส่วนตัว / เปลี่ยนรหัสผ่าน) === -->
     <!-- Tabs -->
     <div class="tab-bar">
         <button class="tab-btn active" onclick="showTab('profile')">📋 ข้อมูลส่วนตัว</button>
         <button class="tab-btn" onclick="showTab('password')">🔒 เปลี่ยนรหัสผ่าน</button>
     </div>
 
+    <!-- === 11. ฟอร์มแก้ไขข้อมูลส่วนตัว === -->
     <!-- Tab: Profile -->
     <div class="tab-content active" id="tab-profile">
         <div class="form-card" style="max-width:100%;">
@@ -198,6 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
     </div>
 
+    <!-- === 12. ฟอร์มเปลี่ยนรหัสผ่าน === -->
     <!-- Tab: Password -->
     <div class="tab-content" id="tab-password">
         <div class="form-card" style="max-width:100%;">
@@ -227,8 +241,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </div>
 </div>
 
+<!-- === 13. ส่วนท้ายของหน้าเว็บ (Footer) === -->
 <footer><strong>CINEMAX</strong> &copy; <?= date('Y') ?></footer>
 
+<!-- === 14. สคริปต์สำหรับการสลับแท็บ (JavaScript) === -->
 <script>
 function showTab(name) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));

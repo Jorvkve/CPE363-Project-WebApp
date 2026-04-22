@@ -1,7 +1,9 @@
 <?php
+// === 1. นำเข้าไฟล์ตั้งค่าและตรวจสอบการล็อกอิน ===
 require_once 'config.php';
 requireLogin();
 
+// === 2. ดึงประวัติการจองทั้งหมดของผู้ใช้จากฐานข้อมูล ===
 // ดึงประวัติการจองทั้งหมดของ user จาก DB
 $stmt = $conn->prepare("
     SELECT b.*, m.title, m.genre, s.show_date, s.show_time, s.hall, s.price
@@ -19,6 +21,7 @@ $bookings = $stmt->get_result();
 $total_bookings = $bookings->num_rows;
 $bookings->data_seek(0);
 
+// === 3. จัดการการยกเลิกการจองตั๋ว (เมื่อผู้ใช้กดยกเลิก) ===
 // ยกเลิก booking
 if (isset($_GET['cancel']) && is_numeric($_GET['cancel'])) {
     $cancel_id = intval($_GET['cancel']);
@@ -45,12 +48,15 @@ if (isset($_GET['cancel']) && is_numeric($_GET['cancel'])) {
     exit();
 }
 
+// === 4. ดึงข้อมูลประวัติการจองใหม่อีกครั้งหลังจากมีการอัปเดต ===
 // ดึงใหม่หลังยกเลิก
 $stmt->execute();
 $bookings = $stmt->get_result();
 
+// ไอคอนหนังแบบสุ่มเพื่อความสวยงาม
 $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
 ?>
+<!-- === 5. เริ่มต้นโครงสร้างหน้าเว็บ (HTML) === -->
 <!DOCTYPE html>
 <html lang="th">
 
@@ -58,11 +64,13 @@ $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ตั๋วของฉัน - CineMax</title>
+    <!-- === 6. นำเข้าไฟล์สไตล์ (CSS) === -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
+    <!-- === 7. แถบเมนูด้านบน (Navigation Bar) === -->
     <nav>
         <a href="index.php" class="nav-logo">CINE<span>MAX</span></a>
         <ul class="nav-links">
@@ -78,6 +86,7 @@ $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
         </ul>
     </nav>
 
+    <!-- === 8. ส่วนหัวหน้าเพจ === -->
     <div class="page-header">
         <div class="page-header-inner">
             <h1>🎟️ ตั๋วของฉัน</h1>
@@ -85,14 +94,17 @@ $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
         </div>
     </div>
 
+    <!-- === 9. ส่วนเนื้อหาหลัก === -->
     <div class="section">
 
+        <!-- === 10. ข้อความแจ้งเตือนเมื่อจองตั๋วสำเร็จ === -->
         <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success" style="max-width:600px;margin:0 auto 1.5rem;">
                 ✅ จองตั๋วสำเร็จแล้ว! ขอให้สนุกกับการดูหนังครับ 🎬
             </div>
         <?php endif; ?>
 
+        <!-- === 11. แสดงหน้าจอเมื่อไม่มีประวัติการจอง === -->
         <?php if ($bookings->num_rows === 0): ?>
             <div class="empty-state">
                 <div class="empty-icon">🎫</div>
@@ -102,6 +114,7 @@ $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
             </div>
         <?php else: ?>
 
+            <!-- === 12. สถิติสรุปจำนวนการจอง === -->
             <!-- Stats -->
             <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;">
                 <div
@@ -112,6 +125,7 @@ $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
                 </div>
             </div>
 
+            <!-- === 13. แสดงรายการประวัติการจองทั้งหมด (Ticket Cards) === -->
             <!-- Booking List -->
             <?php
             $total_spent = 0;
@@ -236,11 +250,13 @@ $emojis = [1 => '🚀', 2 => '🦇', 3 => '🌀', 4 => '🤖', 5 => '🏨'];
 
         <?php endif; ?>
 
+        <!-- === 14. ปุ่มกลับหน้าแรก === -->
         <div style="margin-top:2rem;">
             <a href="index.php" class="btn btn-outline">← กลับหน้าแรก</a>
         </div>
     </div>
 
+    <!-- === 15. ส่วนท้ายของหน้าเว็บ (Footer) === -->
     <footer>
         <strong>CINEMAX</strong> &copy; <?= date('Y') ?>
     </footer>

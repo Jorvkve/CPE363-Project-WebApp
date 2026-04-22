@@ -1,14 +1,18 @@
 <?php
+// === 1. นำเข้าไฟล์ตั้งค่าและตรวจสอบสถานะการล็อกอิน ===
 require_once 'config.php';
 
+// หากผู้ใช้ล็อกอินอยู่แล้ว ให้เปลี่ยนหน้าไปที่หน้าหลัก (index.php) ทันที
 if (isLoggedIn()) {
     header("Location: index.php");
     exit();
 }
 
+// === 2. กำหนดตัวแปรสำหรับเก็บข้อความแจ้งเตือน ===
 $error = '';
 $success = '';
 
+// === 3. จัดการเมื่อผู้ใช้กดปุ่มสมัครสมาชิก (เมื่อมีการส่งฟอร์มแบบ POST) ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $email    = trim($_POST['email'] ?? '');
@@ -17,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm  = $_POST['confirm_password'] ?? '';
 
-    // Validate
+    // === 4. ตรวจสอบความถูกต้องของข้อมูล (Validation) ===
     if (!$username || !$email || !$fullname || !$password) {
         $error = 'กรุณากรอกข้อมูลให้ครบถ้วน';
     } elseif ($password !== $confirm) {
@@ -25,16 +29,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strlen($password) < 6) {
         $error = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
     } else {
-        // เช็ค username/email ซ้ำ
+        // === 5. ตรวจสอบว่ามี Username หรือ Email นี้ซ้ำในระบบหรือไม่ ===
         $check = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
         $check->bind_param("ss", $username, $email);
         $check->execute();
         $check->store_result();
 
+        // ถ้าพบว่ามีข้อมูลอยู่แล้ว จะแจ้งเตือนข้อผิดพลาด
         if ($check->num_rows > 0) {
             $error = 'Username หรือ Email นี้มีผู้ใช้งานแล้ว';
         } else {
-            // บันทึกลง DB
+            // === 6. เข้ารหัสผ่าน (Hash) และบันทึกข้อมูลผู้ใช้ใหม่ลงฐานข้อมูล ===
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("INSERT INTO users (username, email, password, fullname, phone) VALUES (?,?,?,?,?)");
             $stmt->bind_param("sssss", $username, $email, $hashed, $fullname, $phone);
@@ -48,16 +53,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+<!-- === 7. เริ่มต้นโครงสร้างหน้าเว็บ (HTML) === -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สมัครสมาชิก - CineMax</title>
+    <!-- === 8. นำเข้าไฟล์สไตล์ (CSS) === -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<!-- === 9. แถบเมนูด้านบน (Navigation Bar) === -->
 <nav>
     <a href="index.php" class="nav-logo">CINE<span>MAX</span></a>
     <ul class="nav-links">
@@ -67,12 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </ul>
 </nav>
 
+<!-- === 10. พื้นที่สำหรับฟอร์มสมัครสมาชิก === -->
 <div style="min-height:calc(100vh - 64px); display:flex; align-items:center; padding:3rem 1rem; background:radial-gradient(ellipse at top, rgba(229,9,20,0.08), transparent);">
-    <div class="form-card" style="width:100%;">
+    <div class="form-card" style="width:100%; max-width:500px;">
         <div style="text-align:center;font-size:3rem;margin-bottom:1rem;">🎬</div>
         <h1 class="form-title">สมัครสมาชิก</h1>
         <p class="form-subtitle">สร้างบัญชีเพื่อจองตั๋วหนัง</p>
 
+        <!-- === 11. แสดงข้อความแจ้งเตือนเมื่อเกิดข้อผิดพลาด หรือสมัครสำเร็จ === -->
         <?php if ($error): ?>
             <div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
@@ -83,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php else: ?>
 
+        <!-- === 12. แบบฟอร์มกรอกข้อมูลสมัครสมาชิก === -->
         <form method="POST" autocomplete="off">
             <div class="form-row">
                 <div class="form-group">
@@ -129,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
+<!-- === 13. ส่วนท้ายของหน้าเว็บ (Footer) === -->
 <footer>
     <strong>CINEMAX</strong> &copy; <?= date('Y') ?>
 </footer>

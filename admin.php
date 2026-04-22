@@ -1,8 +1,10 @@
-﻿<?php
+<?php
+// === 1. นำเข้าไฟล์ตั้งค่าและตรวจสอบสิทธิ์แอดมิน ===
 require_once 'config.php';
 requireAdmin();
 
 /**
+ * === 2. ฟังก์ชันสำหรับอัปโหลดรูปโปสเตอร์หนัง ===
  * @param array{name?: string, tmp_name?: string, size?: int} $file
  */
 function uploadMoviePoster(array $file): ?string
@@ -15,11 +17,11 @@ function uploadMoviePoster(array $file): ?string
     $allowed = ['jpg', 'jpeg', 'png', 'webp'];
 
     if (!in_array($ext, $allowed, true)) {
-        die("เธฃเธญเธเธฃเธฑเธเน€เธเธเธฒเธฐ JPG, JPEG, PNG เนเธฅเธฐ WEBP");
+        die("รองรับเฉพาะ JPG, JPEG, PNG และ WEBP");
     }
 
     if ($file['size'] > 5 * 1024 * 1024) {
-        die("เธเธเธฒเธ”เนเธเธฅเนเน€เธเธดเธ 5MB");
+        die("ขนาดไฟล์เกิน 5MB");
     }
 
     if (!is_dir('uploads')) {
@@ -30,7 +32,7 @@ function uploadMoviePoster(array $file): ?string
     $path = "uploads/" . $new_name;
 
     if (!move_uploaded_file($file['tmp_name'], $path)) {
-        die("เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเนเนเธกเนเธชเธณเน€เธฃเนเธ เธเธฃเธธเธ“เธฒเธ•เธฃเธงเธเธชเธญเธเธชเธดเธ—เธเธดเนเนเธเธฅเน€เธ”เธญเธฃเน uploads/");
+        die("อัปโหลดไฟล์ไม่สำเร็จ กรุณาตรวจสอบโฟลเดอร์ uploads/");
     }
 
     return $path;
@@ -68,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // toggle showing
+    // === 3.3 เปิด/ปิด สถานะการฉายของหนัง ===
     if ($_POST['action'] === 'toggle_movie') {
         $id = intval($_POST['id']);
         $u = $conn->prepare("UPDATE movies SET is_showing = 1 - is_showing WHERE id=?");
@@ -137,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // เธฅเธเธฃเธญเธเธซเธเธฑเธ
+    // ลบรอบหนัง
     if ($_POST['action'] === 'delete_showtime') {
         $id = intval($_POST['id']);
 
@@ -148,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $count = $chk->get_result()->fetch_assoc()['c'];
 
         if ($count > 0) {
-            die("โ เธฅเธเธฃเธญเธเธเธตเนเนเธกเนเนเธ”เน เน€เธเธฃเธฒเธฐเธกเธตเธเธฒเธฃเธเธญเธเนเธฅเนเธง");
+            die("❌ ไม่สามารถลบรอบนี้ได้ เนื่องจากมีการจองแล้ว");
         }
 
         $d = $conn->prepare("DELETE FROM showtimes WHERE id=?");
@@ -195,7 +197,7 @@ $s_revenue = $conn->query("SELECT SUM(total_price) c FROM bookings WHERE status=
 $s_vip = $conn->query("SELECT SUM(vip_count) c FROM bookings WHERE status='confirmed'")->fetch_assoc()['c'] ?? 0;
 $s_normal = $conn->query("SELECT SUM(normal_count) c FROM bookings WHERE status='confirmed'")->fetch_assoc()['c'] ?? 0;
 
-// เธฃเธฒเธขเนเธ”เนเธฃเธฒเธขเธงเธฑเธ (7 เธงเธฑเธ)
+
 $daily = $conn->query("
     SELECT DATE(booked_at) as day, SUM(total_price) as rev
     FROM bookings WHERE status='confirmed' AND booked_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -208,7 +210,7 @@ while ($d = $daily->fetch_assoc()) {
     $daily_data[] = (float) $d['rev'];
 }
 
-// เธซเธเธฑเธเธขเธญเธ”เธเธดเธขเธก
+
 $top_movies = $conn->query("
     SELECT m.title, COUNT(b.id) as cnt, SUM(b.total_price) as rev
     FROM bookings b JOIN showtimes s ON b.showtime_id=s.id JOIN movies m ON s.movie_id=m.id
@@ -1251,7 +1253,6 @@ $tab = $_GET['tab'] ?? 'dashboard';
         </div><!-- admin-main -->
     </div><!-- admin-layout -->
 
-    <!-- Modal: เน€เธเธดเนเธกเธซเธเธฑเธ -->
     <div class="modal" id="addMovieModal" onclick="if(event.target===this)this.classList.remove('open')">
         <div class="modal-box">
             <h3>Add New Movie</h3>
@@ -1293,7 +1294,6 @@ $tab = $_GET['tab'] ?? 'dashboard';
                     </select>
                 </div>
 
-                <!-- ๐”ฅ เน€เธเธดเนเธกเธชเนเธงเธเธเธตเน -->
                 <div class="form-group">
                     <label>Movie Poster</label>
                     <input type="file" name="poster" accept="image/*">
@@ -1308,7 +1308,7 @@ $tab = $_GET['tab'] ?? 'dashboard';
         </div>
     </div>
 
-    <!-- Modal: เนเธเนเนเธเธซเธเธฑเธ -->
+
     <div class="modal" id="editMovieModal" onclick="if(event.target===this)this.classList.remove('open')">
         <div class="modal-box">
             <h3>Edit Movie</h3>
@@ -1406,7 +1406,7 @@ $tab = $_GET['tab'] ?? 'dashboard';
     });
     <?php endif; ?>
 
-    // ๐”ฅ เน€เธเธดเนเธก 2 เธ•เธฑเธงเธเธตเนเน€เธเนเธฒเนเธ
+
     function selectHall(el, value) {
         document.querySelectorAll('[onclick^="selectHall"]').forEach(btn => {
             btn.classList.remove('active');
