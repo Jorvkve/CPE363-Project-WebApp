@@ -58,10 +58,11 @@ $emoji = $emojis[$id] ?? '🎬';
     <nav>
         <a href="index.php" class="nav-logo">CINE<span>MAX</span></a>
         <ul class="nav-links">
-            <li><a href="index.php">Home</a></li>
+            <li><a href="index.php">หน้าแรก</a></li>
             <?php if (isLoggedIn()): ?>
-                <li><a href="mybooking.php">My Bookings</a></li>
-                <li><a href="logout.php" class="btn-nav">Logout</a></li>
+                <li><a href="mybooking.php">ตั๋วของฉัน</a></li>
+                <li><a href="logout.php" class="btn-nav">ออกจากระบบ
+                    </a></li>
             <?php else: ?>
                 <li><a href="login.php">Login</a></li>
                 <li><a href="register.php" class="btn-nav">Register</a></li>
@@ -73,13 +74,16 @@ $emoji = $emojis[$id] ?? '🎬';
         <div class="movie-detail-grid">
             <div class="movie-detail-poster">
                 <?php if (!empty($movie['poster']) && file_exists($movie['poster'])): ?>
-                    <img src="<?= htmlspecialchars($movie['poster']) ?>" alt="<?= htmlspecialchars($movie['title']) ?>" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="<?= htmlspecialchars($movie['poster']) ?>" alt="<?= htmlspecialchars($movie['title']) ?>"
+                        style="width:100%;height:100%;object-fit:cover;">
                 <?php else: ?>
                     <?= $emoji ?>
                 <?php endif; ?>
             </div>
             <div>
-                <div style="color:var(--accent);font-size:0.85rem;font-weight:600;letter-spacing:2px;margin-bottom:0.5rem;">NOW SHOWING</div>
+                <div
+                    style="color:var(--accent);font-size:0.85rem;font-weight:600;letter-spacing:2px;margin-bottom:0.5rem;">
+                    NOW SHOWING</div>
                 <h1 class="movie-detail-title"><?= htmlspecialchars($movie['title']) ?></h1>
 
                 <div class="movie-tags">
@@ -117,7 +121,8 @@ $emoji = $emojis[$id] ?? '🎬';
             <div class="showtime-date-strip">
                 <?php foreach ($available_dates as $date): ?>
                     <?php $is_active = $date === $selected_date; ?>
-                    <a href="movie.php?id=<?= $id ?>&date=<?= urlencode($date) ?>" class="showtime-date-chip <?= $is_active ? 'active' : '' ?>">
+                    <a href="movie.php?id=<?= $id ?>&date=<?= urlencode($date) ?>"
+                        class="showtime-date-chip <?= $is_active ? 'active' : '' ?>">
                         <span class="showtime-date-weekday"><?= date('D', strtotime($date)) ?></span>
                         <span class="showtime-date-day"><?= date('d', strtotime($date)) ?></span>
                         <span class="showtime-date-month"><?= date('M Y', strtotime($date)) ?></span>
@@ -143,8 +148,10 @@ $emoji = $emojis[$id] ?? '🎬';
             <?php endif; ?>
 
             <?php if (!isLoggedIn()): ?>
-                <div style="margin-top:1.5rem;padding:1rem 1.5rem;background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.3);border-radius:10px;font-size:0.9rem;">
-                    Please <a href="login.php" style="color:var(--accent);font-weight:700;">log in</a> before booking your ticket.
+                <div
+                    style="margin-top:1.5rem;padding:1rem 1.5rem;background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.3);border-radius:10px;font-size:0.9rem;">
+                    Please <a href="login.php" style="color:var(--accent);font-weight:700;">log in</a> before booking your
+                    ticket.
                 </div>
             <?php endif; ?>
         <?php else: ?>

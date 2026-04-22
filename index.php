@@ -103,7 +103,7 @@ $emojis = ['🚀', '🎇', '🌌', '🎭', '🏰'];
     </nav>
 
     <div class="hero">
-        <h1 class="hero-title">ดูหนัง<span>ออนไลน์</span></h1>
+        <h1 class="hero-title">จองตั๋วหนัง<span>ออนไลน์</span></h1>
         <p class="hero-sub">ค้นหารอบหนังที่ใช่ เลือกเวลาได้ง่าย และจองที่นั่งได้ในไม่กี่ขั้นตอน</p>
     </div>
 
@@ -114,11 +114,7 @@ $emojis = ['🚀', '🎇', '🌌', '🎭', '🏰'];
             <div class="filter-grid">
                 <div class="form-group" style="margin-bottom:0;">
                     <label for="q">ค้นหาหนัง</label>
-                    <input
-                        type="text"
-                        id="q"
-                        name="q"
-                        value="<?= htmlspecialchars($search) ?>"
+                    <input type="text" id="q" name="q" value="<?= htmlspecialchars($search) ?>"
                         placeholder="เช่น Spider-Man, Action, ผจญภัย">
                 </div>
 
@@ -127,7 +123,8 @@ $emojis = ['🚀', '🎇', '🌌', '🎭', '🏰'];
                     <select id="genre" name="genre">
                         <option value="">ทุกประเภท</option>
                         <?php while ($genre = $genre_result->fetch_assoc()): ?>
-                            <option value="<?= htmlspecialchars($genre['genre']) ?>" <?= $selected_genre === $genre['genre'] ? 'selected' : '' ?>>
+                            <option value="<?= htmlspecialchars($genre['genre']) ?>"
+                                <?= $selected_genre === $genre['genre'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($genre['genre']) ?>
                             </option>
                         <?php endwhile; ?>
@@ -139,7 +136,8 @@ $emojis = ['🚀', '🎇', '🌌', '🎭', '🏰'];
                     <select id="date" name="date">
                         <option value="">ทุกวัน</option>
                         <?php while ($date = $available_dates->fetch_assoc()): ?>
-                            <option value="<?= $date['show_date'] ?>" <?= $selected_date === $date['show_date'] ? 'selected' : '' ?>>
+                            <option value="<?= $date['show_date'] ?>"
+                                <?= $selected_date === $date['show_date'] ? 'selected' : '' ?>>
                                 <?= date('d/m/Y', strtotime($date['show_date'])) ?>
                             </option>
                         <?php endwhile; ?>
@@ -161,7 +159,8 @@ $emojis = ['🚀', '🎇', '🌌', '🎭', '🏰'];
                     <a href="movie.php?id=<?= $movie['id'] ?>" class="movie-card">
                         <div class="movie-poster">
                             <?php if (!empty($movie['poster']) && file_exists($movie['poster'])): ?>
-                                <img src="<?= htmlspecialchars($movie['poster']) ?>" class="movie-poster-img" alt="<?= htmlspecialchars($movie['title']) ?>">
+                                <img src="<?= htmlspecialchars($movie['poster']) ?>" class="movie-poster-img"
+                                    alt="<?= htmlspecialchars($movie['title']) ?>">
                             <?php else: ?>
                                 <span><?= $emojis[$i % count($emojis)] ?></span>
                             <?php endif; ?>
@@ -211,12 +210,14 @@ $emojis = ['🚀', '🎇', '🌌', '🎭', '🏰'];
             <div>
                 <div style="font-size:2.5rem;margin-bottom:0.8rem;">💺</div>
                 <div style="font-weight:700;margin-bottom:0.3rem;">เลือกที่นั่งเอง</div>
-                <div style="color:var(--text-dim);font-size:0.9rem;">เข้าหนังเรื่องที่ต้องการแล้วจองที่นั่งได้ทันที</div>
+                <div style="color:var(--text-dim);font-size:0.9rem;">เข้าหนังเรื่องที่ต้องการแล้วจองที่นั่งได้ทันที
+                </div>
             </div>
             <div>
                 <div style="font-size:2.5rem;margin-bottom:0.8rem;">📋</div>
                 <div style="font-weight:700;margin-bottom:0.3rem;">ดูรอบถัดไปง่ายขึ้น</div>
-                <div style="color:var(--text-dim);font-size:0.9rem;">ทุกการ์ดหนังจะแสดงเวลารอบถัดไปและจำนวนรอบที่มี</div>
+                <div style="color:var(--text-dim);font-size:0.9rem;">ทุกการ์ดหนังจะแสดงเวลารอบถัดไปและจำนวนรอบที่มี
+                </div>
             </div>
         </div>
     </div>
